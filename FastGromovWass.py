@@ -4,6 +4,7 @@ import LinSinkhorn
 import utils
 from sklearn.cluster import KMeans
 from sklearn import preprocessing
+import types
 
 
 def KL(A, B):
@@ -380,7 +381,7 @@ def Quad_LGW_MD(
     reg=0,
     alpha=1e-10,
     C_init=False,
-    Init="lower_bound",
+    Init="kmeans",
     seed_init=49,
     reg_init=1e-1,
     method="Dykstra",
@@ -742,6 +743,64 @@ def Quad_LGW_MD(
     return acc[-1], np.array(acc), np.array(times), np.array(list_num_op), Couplings
 
 
+def apply_quad_lr_gw(
+    X, Y, a, b, rank, cost, gamma_0=10, rescale_cost=True, time_out=50
+):
+    if type(cost) == types.FunctionType:
+        res, arr_acc, arr_times, arr_list_num_op, Couplings = Quad_LGW_MD(
+            X,
+            Y,
+            a,
+            b,
+            rank,
+            cost,
+            time_out=time_out,
+            max_iter=1000,
+            delta=1e-3,
+            gamma_0=gamma_0,
+            gamma_init="rescale",
+            reg=0,
+            alpha=1e-10,
+            C_init=False,
+            Init="kmeans",
+            seed_init=49,
+            reg_init=1e-1,
+            method="Dykstra",
+            max_iter_IBP=10000,
+            delta_IBP=1e-3,
+            lam_IBP=0,
+            rescale_cost=rescale_cost,
+        )
+    else:
+        res, arr_acc, arr_times, arr_list_num_op, Couplings = Quad_LGW_MD(
+            X,
+            Y,
+            a,
+            b,
+            rank,
+            cost,
+            time_out=time_out,
+            max_iter=1000,
+            delta=1e-3,
+            gamma_0=gamma_0,
+            gamma_init="rescale",
+            reg=0,
+            alpha=1e-10,
+            C_init=True,
+            Init="kmeans",
+            seed_init=49,
+            reg_init=1e-1,
+            method="Dykstra",
+            max_iter_IBP=10000,
+            delta_IBP=1e-3,
+            lam_IBP=0,
+            rescale_cost=rescale_cost,
+        )
+
+    Q, R, g = Couplings[-1]
+    return res, Q, R, g
+
+
 def update_Lin_cost_GW(D11, D12, D21, D22, Q, R, g):
     n, d1 = np.shape(D11)
     m, d2 = np.shape(D21)
@@ -775,7 +834,7 @@ def Lin_LGW_MD(
     reg=0,
     alpha=1e-10,
     C_init=False,
-    Init="lower_bound",
+    Init="kmeans",
     seed_init=49,
     reg_init=1e-1,
     method="Dykstra",
@@ -1203,6 +1262,78 @@ def Lin_LGW_MD(
         Couplings,
         np.array(list_niter_Dykstra),
     )
+
+
+def apply_lin_lr_gw(
+    X, Y, a, b, rank, cost_factorized, gamma_0=10, rescale_cost=True, time_out=50
+):
+    if type(cost_factorized) == types.FunctionType:
+        (
+            res,
+            arr_acc,
+            arr_times,
+            arr_list_num_op,
+            Couplings,
+            arr_list_niter_Dykstra,
+        ) = Lin_LGW_MD(
+            X,
+            Y,
+            a,
+            b,
+            rank,
+            cost_factorized,
+            time_out=time_out,
+            max_iter=1000,
+            delta=1e-3,
+            gamma_0=gamma_0,
+            gamma_init="rescale",
+            reg=0,
+            alpha=1e-10,
+            C_init=False,
+            Init="kmeans",
+            seed_init=49,
+            reg_init=1e-1,
+            method="Dykstra",
+            max_iter_IBP=10000,
+            delta_IBP=1e-3,
+            lam_IBP=0,
+            rescale_cost=rescale_cost,
+        )
+    else:
+        (
+            res,
+            arr_acc,
+            arr_times,
+            arr_list_num_op,
+            Couplings,
+            arr_list_niter_Dykstra,
+        ) = Lin_LGW_MD(
+            X,
+            Y,
+            a,
+            b,
+            rank,
+            cost_factorized,
+            time_out=time_out,
+            max_iter=1000,
+            delta=1e-3,
+            gamma_0=gamma_0,
+            gamma_init="rescale",
+            reg=0,
+            alpha=1e-10,
+            C_init=True,
+            Init="kmeans",
+            seed_init=49,
+            reg_init=1e-1,
+            method="Dykstra",
+            max_iter_IBP=10000,
+            delta_IBP=1e-3,
+            lam_IBP=0,
+            rescale_cost=rescale_cost,
+        )
+
+    Q, R, g = Couplings[-1]
+    return res, Q, R, g
 
 
 def Sinkhorn(C, reg, a, b, delta=1e-9, num_iter=1000, lam=1e-6):

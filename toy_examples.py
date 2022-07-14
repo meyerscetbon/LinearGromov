@@ -201,84 +201,26 @@ pl.imshow(Couplings[-1], interpolation="nearest", cmap="Greys", aspect="auto")
 ### LR-GW: Quadratic method
 rank = 10
 cost_SE = (D1, D2)
-results = FastGromovWass.Quad_LGW_MD(
-    X,
-    Y,
-    a,
-    b,
-    rank,
-    cost_SE,
-    time_out=200,
-    max_iter=1000,
-    delta=1e-3,
-    gamma_0=10,
-    gamma_init="rescale",
-    reg=0,
-    alpha=1e-10,
-    C_init=True,
-    Init="kmeans",
-    seed_init=49,
-    reg_init=1e-1,
-    method="Dykstra",
-    max_iter_IBP=10000,
-    delta_IBP=1e-3,
-    lam_IBP=0,
-    rescale_cost=False,
+results = FastGromovWass.apply_quad_lr_gw(
+    X, Y, a, b, rank, cost_SE, gamma_0=10, rescale_cost=False, time_out=50
 )
-
-res, acc, times, num_ops, Couplings = results
+res, Q, R, g = results
 print(res)
 
-
-# Plot the coupling after an non-trivial initialization
-Q, R, g = Couplings[0]
-P = np.dot(Q / g, R.T)
-pl.imshow(P, interpolation="nearest", cmap="Greys", aspect="auto")
-
-
-# Plot the final coupling obtained
-Q, R, g = Couplings[-1]
+# Plot the coupling obtained
 P = np.dot(Q / g, R.T)
 pl.imshow(P, interpolation="nearest", cmap="Greys", aspect="auto")
 
 ### LR-GW: Linear method
 rank = 10
 cost_SE = (D11, D12, D21, D22)
-results = FastGromovWass.Lin_LGW_MD(
-    X,
-    Y,
-    a,
-    b,
-    rank,
-    cost_SE,
-    time_out=200,
-    max_iter=1000,
-    delta=1e-3,
-    gamma_0=10,
-    gamma_init="rescale",
-    reg=0,
-    alpha=1e-10,
-    C_init=True,
-    Init="kmeans",
-    seed_init=49,
-    reg_init=1e-1,
-    method="Dykstra",
-    max_iter_IBP=10000,
-    delta_IBP=1e-3,
-    lam_IBP=0,
-    rescale_cost=False,
+results = FastGromovWass.apply_lin_lr_gw(
+    X, Y, a, b, rank, cost_SE, gamma_0=10, rescale_cost=False, time_out=50
 )
 
-res, acc, times, num_ops, Couplings, list_niter_Dykstra = results
+res, Q, R, g = results
 print(res)
 
-# Plot the coupling after an non-trivial initialization
-Q, R, g = Couplings[0]
-P = np.dot(Q / g, R.T)
-pl.imshow(P, interpolation="nearest", cmap="Greys", aspect="auto")
-
-
 # Plot the final coupling obtained
-Q, R, g = Couplings[-1]
 P = np.dot(Q / g, R.T)
 pl.imshow(P, interpolation="nearest", cmap="Greys", aspect="auto")
