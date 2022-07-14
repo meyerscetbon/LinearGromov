@@ -1,6 +1,3 @@
-import sys
-
-sys.path.append("./LinearGromov_github/")
 import numpy as np
 import FastGromovWass
 import utils
