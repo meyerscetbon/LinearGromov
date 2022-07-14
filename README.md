@@ -8,7 +8,8 @@ In this work, we propose to regularize the Gromov-Wasserstein (GW) problem by co
 ![figure](figures/coupling_plot.jpg)
 
 
-Our regularization can take also advantage of the geometry of the problem, in particular when the cost matrices involved in the GW problem admits a low-rank factorization. In this case, our method is able to compute the the LR-GW cost in linear time with respect to the number of samples. We present the time-accuracy tradeoff between different methods when the samples are drawn from two Gaussian distributions evaluated on 5000 points in 2D and the underlying cost is the squared Euclidean distance.
+Our regularization can take also advantage of the geometry of the problem, in particular when the cost matrices involved in the GW problem admits a low-rank factorization. In this case, our method is able to compute the the LR-GW cost in linear time with respect to the number of samples. We present the time-accuracy tradeoff between different methods when the samples are drawn from two anisotropic Gaussian blobs of 5 or 20 clusters in 10D and 15D,
+endowed with the squared Euclidean distance  with n = m = 10000 samples. 
 ![figure](figures/acc_plot.jpg)
 
 In this [file](https://github.com/meyerscetbon/LinearGromov/blob/main/toy_examples.py) we provide some toy examples where we compare the Entropic GW scheme with our proposed method. 
