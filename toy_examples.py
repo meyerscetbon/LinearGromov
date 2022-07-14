@@ -1,9 +1,13 @@
+import sys
+
+sys.path.append("./LinearGromov_github/")
 import numpy as np
 import FastGromovWass
-import LinSinkhorn
+import utils
 
 import matplotlib.pylab as pl
 from mpl_toolkits.mplot3d import Axes3D  # noqa
+
 
 ### Some examples of toy data
 def Mixture_of_Gaussians(num_samples, sigma, dimension1, dimension2, seed=49):
@@ -65,7 +69,7 @@ def simul_two_Gaussians(num_samples, dimension1, dimension2, seed=49):
 def curve_2d_3d(num_samples):
     theta = np.linspace(-4 * np.pi, 4 * np.pi, num_samples)
     z = np.linspace(1, 2, num_samples)
-    r = z ** 2 + 1
+    r = z**2 + 1
     x = r * np.sin(theta)
     y = r * np.cos(theta)
 
@@ -100,20 +104,20 @@ pl.show()
 
 
 ### Define the cost function: here we give several examples
-Square_Euclidean_cost = lambda X, Y: LinSinkhorn.Square_Euclidean_Distance(X, Y)
-L1_cost = lambda X, Y: LinSinkhorn.Lp_Distance(X, Y, p=1)
-L3_cost = lambda X, Y: LinSinkhorn.Lp_Distance(X, Y, p=3)
+Square_Euclidean_cost = lambda X, Y: utils.Square_Euclidean_Distance(X, Y)
+L1_cost = lambda X, Y: utils.Lp_Distance(X, Y, p=1)
+L3_cost = lambda X, Y: utils.Lp_Distance(X, Y, p=3)
 
 cost = Square_Euclidean_cost
 
 ## Define the factorized cost function
 rank_cost = 100
-cost_factorized = lambda X, Y: LinSinkhorn.factorized_distance_cost(
+cost_factorized = lambda X, Y: utils.factorized_distance_cost(
     X, Y, rank_cost, cost, C_init=False, tol=1e-1, seed=50
 )
 
 ## Here is an exact implementation of the factorized SE distance
-cost_factorized = lambda X, Y: LinSinkhorn.factorized_square_Euclidean(X, Y)
+cost_factorized = lambda X, Y: utils.factorized_square_Euclidean(X, Y)
 
 
 ## Compute the cost matrices
@@ -126,7 +130,6 @@ D21, D22 = cost_factorized(Y, Y)
 
 ## Normalize the cost matrices
 r1, r2 = D1.max(), D2.max()
-
 D1, D2 = D1 / r1, D2 / r2
 D11, D12 = D11 / np.sqrt(r1), D12 / np.sqrt(r1)
 D21, D22 = D21 / np.sqrt(r2), D22 / np.sqrt(r2)
@@ -137,7 +140,7 @@ a, b = (1 / n) * np.ones(n), (1 / m) * np.ones(m)
 
 
 ### Compute GW cost with a trivial initialization
-res = FastGromovWass.GW_Init(D11, D12, D21, D22, a, b)
+res = FastGromovWass.GW_init_factorized(D11, D12, D21, D22, a, b)
 print(res)
 
 
@@ -196,34 +199,33 @@ pl.imshow(Couplings[-1], interpolation="nearest", cmap="Greys", aspect="auto")
 
 
 ### LR-GW: Quadratic method
-rank_LR = 10
-reg = 0
-alpha = 1e-10
-C_init = True
+rank = 10
 cost_SE = (D1, D2)
 results = FastGromovWass.Quad_LGW_MD(
     X,
     Y,
     a,
     b,
-    rank_LR,
-    reg,
-    alpha,
+    rank,
     cost_SE,
-    C_init=C_init,
-    Init="lower_bound",
+    time_out=200,
+    max_iter=1000,
+    delta=1e-3,
+    gamma_0=10,
+    gamma_init="rescale",
+    reg=0,
+    alpha=1e-10,
+    C_init=True,
+    Init="kmeans",
     seed_init=49,
     reg_init=1e-1,
-    gamma_init="arbitrary",
-    gamma_0=100,
     method="Dykstra",
-    max_iter=100,
-    delta=1e-9,
     max_iter_IBP=10000,
     delta_IBP=1e-3,
     lam_IBP=0,
-    time_out=50,
+    rescale_cost=False,
 )
+
 res, acc, times, num_ops, Couplings = results
 print(res)
 
@@ -239,37 +241,35 @@ Q, R, g = Couplings[-1]
 P = np.dot(Q / g, R.T)
 pl.imshow(P, interpolation="nearest", cmap="Greys", aspect="auto")
 
-
 ### LR-GW: Linear method
-rank_LR = 10
-reg = 0
-alpha = 1e-10
-C_init = True
+rank = 10
 cost_SE = (D11, D12, D21, D22)
 results = FastGromovWass.Lin_LGW_MD(
     X,
     Y,
     a,
     b,
-    rank_LR,
-    reg,
-    alpha,
+    rank,
     cost_SE,
-    C_init=C_init,
-    Init="lower_bound",
+    time_out=200,
+    max_iter=1000,
+    delta=1e-3,
+    gamma_0=10,
+    gamma_init="rescale",
+    reg=0,
+    alpha=1e-10,
+    C_init=True,
+    Init="kmeans",
     seed_init=49,
     reg_init=1e-1,
-    gamma_init="arbitrary",
-    gamma_0=100,
     method="Dykstra",
-    max_iter=100,
-    delta=1e-9,
     max_iter_IBP=10000,
     delta_IBP=1e-3,
     lam_IBP=0,
-    time_out=50,
+    rescale_cost=False,
 )
-res, acc, times, num_ops, Couplings = results
+
+res, acc, times, num_ops, Couplings, list_niter_Dykstra = results
 print(res)
 
 # Plot the coupling after an non-trivial initialization
