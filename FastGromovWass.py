@@ -406,17 +406,21 @@ def Quad_LGW_MD(
     n, m = np.shape(a)[0], np.shape(b)[0]
 
     if C_init == True:
-        if len(cost) == 2:
+        if len(cost) != 2:
+            print("Error: some cost matrices are missing")
+            return "Error"
+        else:
             D1, D2 = cost
             if rescale_cost == True:
                 D1, D2 = D1 / D1.max(), D2 / D2.max()
-        else:
-            print("Error: cost not adapted")
-            return "Error"
     else:
         D1, D2 = cost(X, X), cost(Y, Y)
-        if rescale_cost == True:
-            D1, D2 = D1 / D1.max(), D2 / D2.max()
+        if len(D1) != 1:
+            print("Error: the cost function is not adapted")
+            return "Error"
+        else:
+            if rescale_cost == True:
+                D1, D2 = D1 / D1.max(), D2 / D2.max()
 
     ########### Initialization ###########
     if Init == "kmeans":
@@ -857,7 +861,10 @@ def Lin_LGW_MD(
         return "Error"
 
     if C_init == True:
-        if len(cost_factorized) == 4:
+        if len(cost_factorized) != 4:
+            print("Error: some cost matrices are missing")
+            return "Error"
+        else:
             D11, D12, D21, D22 = cost_factorized
             if rescale_cost == True:
                 D11, D12, D21, D22 = (
@@ -866,19 +873,21 @@ def Lin_LGW_MD(
                     D21 / np.sqrt(np.max(D21)),
                     D22 / np.sqrt(np.max(D22)),
                 )
-        else:
-            print("Error: cost not adapted")
-            return "Error"
     else:
-        D11, D12 = cost_factorized(X, X)
-        D21, D22 = cost_factorized(Y, Y)
-        if rescale_cost == True:
-            D11, D12, D21, D22 = (
-                D11 / np.sqrt(np.max(D11)),
-                D12 / np.sqrt(np.max(D12)),
-                D21 / np.sqrt(np.max(D21)),
-                D22 / np.sqrt(np.max(D22)),
-            )
+        D1 = cost_factorized(X, X)
+        if len(D1) != 2:
+            print("Error: the cost function is not adapted")
+            return "Error"
+        else:
+            D11, D12 = D1
+            D21, D22 = cost_factorized(Y, Y)
+            if rescale_cost == True:
+                D11, D12, D21, D22 = (
+                    D11 / np.sqrt(np.max(D11)),
+                    D12 / np.sqrt(np.max(D12)),
+                    D21 / np.sqrt(np.max(D21)),
+                    D22 / np.sqrt(np.max(D22)),
+                )
 
     r = rank
     n, d1 = np.shape(D11)
