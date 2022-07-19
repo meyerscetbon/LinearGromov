@@ -604,20 +604,26 @@ def Quad_LGW_MD(
 
             K1_trans_0 = np.dot(C2, R)  # r * m * r
             K1_trans_0 = np.dot(C1, K1_trans_0)  # n * r * r
-            grad_Q = K1_trans_0 / g + reg * np.log(Q)
+            grad_Q = K1_trans_0 / g
+            if reg != 0.0:
+                grad_Q = grad_Q + reg * np.log(Q)
             if gamma_init == "rescale":
                 # norm_1 = np.linalg.norm(grad_Q)**2
                 norm_1 = np.max(np.abs(grad_Q)) ** 2
 
             K2_trans_0 = np.dot(C1.T, Q)  # r * n * r
             K2_trans_0 = np.dot(C2.T, K2_trans_0)  # m * r * r
-            grad_R = K2_trans_0 / g + reg * np.log(R)
+            grad_R = K2_trans_0 / g
+            if reg != 0.0:
+                grad_R = grad_R + reg * np.log(R)
             if gamma_init == "rescale":
                 # norm_2 = np.linalg.norm(grad_R)**2
                 norm_2 = np.max(np.abs(grad_R)) ** 2
 
             omega = np.diag(np.dot(Q.T, K1_trans_0))  # r * n * r
-            grad_g = -(omega / (g**2)) + reg * np.log(g)
+            grad_g = -(omega / (g**2))
+            if reg != 0.0:
+                grad_g = grad_g + reg * np.log(g)
             if gamma_init == "rescale":
                 # norm_3 = np.linalg.norm(grad_g)**2
                 norm_3 = np.max(np.abs(grad_g)) ** 2
